@@ -1,0 +1,41 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+repository = "https://github.com/laserdata/laser-example"
+rust-version = "1.96"
+version = "0.1.0"
+
+[workspace.dependencies]
+async-trait = { version = "0.1.91" }
+bon = { version = "3.9.3" }
+futures = { version = "0.3.33" }
+laser-sdk = { version = "0.0.1-rc.16", features = ["managed", "schema-codecs", "sign"] }
+photon-adversary = { path = "crates/adversary" }
+photon-desk = { path = "crates/desk" }
+photon-insights = { path = "crates/insights" }
+photon-orders = { path = "crates/orders" }
+photon-shared = { path = "crates/shared" }
+photon-storefront = { path = "crates/storefront" }
+rand = { version = "0.10" }
+reqwest = { version = "0.13.4", default-features = false, features = ["json", "rustls"] }
+secrecy = { version = "0.10.3" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+sha2 = { version = "0.11.0" }
+strum = { version = "0.28.0", features = ["derive"] }
+tempfile = { version = "3.27.0" }
+testcontainers-modules = { version = "0.15.0", features = ["http_wait"] }
+thiserror = { version = "2.0.19" }
+tokio = { version = "1.53.0", features = ["macros", "rt", "rt-multi-thread", "signal", "sync", "time"] }
+tracing = { version = "0.1.44" }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+ulid = { version = "3.0.0" }
+
+[profile.release]
+codegen-units = 1
+lto = true
