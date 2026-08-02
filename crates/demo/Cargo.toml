@@ -1,0 +1,35 @@
+[package]
+name = "photon-demo"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[features]
+e2e = []
+llm-anthropic = ["photon-desk/llm-anthropic"]
+llm-openai = ["photon-desk/llm-openai"]
+
+[dependencies]
+laser-sdk = { workspace = true }
+photon-adversary = { workspace = true }
+photon-desk = { workspace = true }
+photon-insights = { workspace = true }
+photon-orders = { workspace = true }
+photon-shared = { workspace = true }
+photon-storefront = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+photon-shared = { workspace = true, features = ["testkit"] }
+ulid = { workspace = true }
+
+[[test]]
+name = "e2e"
+path = "tests/e2e.rs"
+required-features = ["e2e"]

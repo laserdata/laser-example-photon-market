@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+.env
+.idea/
+.vscode/
+.claude/settings.local.json
