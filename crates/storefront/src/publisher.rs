@@ -93,5 +93,6 @@ async fn publish_order(
             idempotency_key: format!("place-order/{order}"),
         },
     )
-    .await
+    .await?;
+    Ok(())
 }

@@ -859,7 +859,8 @@ async fn place(laser: &Laser, order: OrderId, sku: &str, quantity: u32) -> Resul
             idempotency_key: format!("place-order/{order}"),
         },
     )
-    .await
+    .await?;
+    Ok(())
 }
 
 async fn wait_until_accepted(laser: &Laser, order: OrderId) {
@@ -988,7 +989,8 @@ async fn publish_order_event(
             idempotency_key: format!("order-event/{}/{suffix}", event.order),
         },
     )
-    .await
+    .await?;
+    Ok(())
 }
 
 async fn publish_damaged_ticket(
@@ -1035,7 +1037,8 @@ async fn publish_support_ticket(
             idempotency_key: format!("ticket/{ticket_id}"),
         },
     )
-    .await
+    .await?;
+    Ok(())
 }
 
 async fn wait_for_chat(laser: &Laser, session: ConversationId, ticket: TicketId) -> String {

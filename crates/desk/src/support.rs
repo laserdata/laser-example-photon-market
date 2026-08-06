@@ -314,7 +314,8 @@ impl SupportAgent {
             },
             self.order_schema_id,
         )
-        .await
+        .await?;
+        Ok(())
     }
 }
 

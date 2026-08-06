@@ -99,5 +99,6 @@ async fn open_ticket(
             idempotency_key: format!("ticket/{ticket}"),
         },
     )
-    .await
+    .await?;
+    Ok(())
 }
