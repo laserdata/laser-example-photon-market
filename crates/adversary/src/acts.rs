@@ -24,7 +24,8 @@ pub async fn poison(laser: &Laser) -> Result<(), LaserError> {
         .payload(b"{ this is not a decodable place-order".to_vec())
         .provenance(&stamped)
         .send()
-        .await
+        .await?;
+    Ok(())
 }
 
 pub async fn duplicate_flood(laser: &Laser, seed: u64) -> Result<OrderId, LaserError> {

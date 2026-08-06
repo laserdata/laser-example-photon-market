@@ -14,7 +14,7 @@ version = "0.1.0"
 async-trait = { version = "0.1.91" }
 bon = { version = "3.9.3" }
 futures = { version = "0.3.33" }
-laser-sdk = { version = "0.0.1", features = ["managed", "schema-codecs", "sign"] }
+laser-sdk = { version = "0.1.0", features = ["managed", "schema-codecs", "sign"] }
 photon-adversary = { path = "crates/adversary" }
 photon-desk = { path = "crates/desk" }
 photon-insights = { path = "crates/insights" }

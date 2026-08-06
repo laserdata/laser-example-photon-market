@@ -1,5 +1,7 @@
 use crate::names::{AppAgent, BusinessTopic};
-use laser_sdk::prelude::{ConversationId, Laser, LaserError, MessageId, Provenance};
+use laser_sdk::prelude::{
+    ConversationId, Laser, LaserError, MessageId, Provenance, SendMessagesResponse,
+};
 use serde::Serialize;
 
 pub struct BusinessProvenance {
@@ -14,7 +16,7 @@ pub async fn publish_business<T: Serialize>(
     topic: BusinessTopic,
     payload: &T,
     provenance: BusinessProvenance,
-) -> Result<(), LaserError> {
+) -> Result<SendMessagesResponse, LaserError> {
     publish_business_with_schema(laser, topic, payload, provenance, None).await
 }
 
@@ -24,7 +26,7 @@ pub async fn publish_business_with_schema<T: Serialize>(
     payload: &T,
     provenance: BusinessProvenance,
     schema_id: Option<u32>,
-) -> Result<(), LaserError> {
+) -> Result<SendMessagesResponse, LaserError> {
     let topic = topic.topic(laser);
     let provenance = provenance.into_provenance();
     let request = topic.publish().json(payload)?.provenance(&provenance);
