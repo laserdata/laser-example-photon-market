@@ -107,7 +107,7 @@ async fn register_projection(
                 .source(topic.stream(), topic.to_string())
                 .allow(projection_id.clone())
                 .default_projection(projection_id)
-                .target_table(&index)
+                .index(&index)
                 .retention(retention)
                 .notify()
                 .build(),

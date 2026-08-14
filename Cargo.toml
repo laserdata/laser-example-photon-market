@@ -11,10 +11,10 @@ rust-version = "1.96"
 version = "0.1.0"
 
 [workspace.dependencies]
-async-trait = { version = "0.1.91" }
+async-trait = { version = "0.1.92" }
 bon = { version = "3.9.3" }
-futures = { version = "0.3.33" }
-laser-sdk = { version = "0.1.0", features = ["managed", "schema-codecs", "sign"] }
+futures = { version = "0.3.34" }
+laser-sdk = { version = "0.2.0", features = ["managed", "schema-codecs", "sign"] }
 photon-adversary = { path = "crates/adversary" }
 photon-desk = { path = "crates/desk" }
 photon-insights = { path = "crates/insights" }
@@ -30,7 +30,7 @@ sha2 = { version = "0.11.0" }
 strum = { version = "0.28.0", features = ["derive"] }
 tempfile = { version = "3.27.0" }
 testcontainers-modules = { version = "0.15.0", features = ["http_wait"] }
-thiserror = { version = "2.0.19" }
+thiserror = { version = "2.0.20" }
 tokio = { version = "1.53.1", features = ["macros", "rt", "rt-multi-thread", "signal", "sync", "time"] }
 tracing = { version = "0.1.44" }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
