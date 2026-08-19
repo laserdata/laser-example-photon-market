@@ -1,6 +1,7 @@
 use crate::names::{BusinessTopic, STREAM};
 use laser_sdk::iggy::prelude::{
     CompressionAlgorithm, Identifier, IggyExpiry, MaxTopicSize, StreamClient, TopicClient,
+    TopicCreateOptions,
 };
 use laser_sdk::prelude::{AgentTopic, Laser, LaserError};
 use std::collections::{HashMap, HashSet};
@@ -79,23 +80,20 @@ async fn ensure_stream_topics(
         .into_iter()
         .map(|topic| topic.name)
         .collect();
+    let options = TopicCreateOptions {
+        partitions_count: Some(PARTITIONS),
+        compression_algorithm: Some(CompressionAlgorithm::default()),
+        message_expiry: Some(IggyExpiry::NeverExpire),
+        max_topic_size: Some(MaxTopicSize::ServerDefault),
+        ..TopicCreateOptions::default()
+    };
 
     for name in topics {
         if existing.contains(name) {
             continue;
         }
         let topic_id = Identifier::named(name)?;
-        let result = client
-            .create_topic(
-                &stream_id,
-                name,
-                PARTITIONS,
-                CompressionAlgorithm::default(),
-                None,
-                IggyExpiry::NeverExpire,
-                MaxTopicSize::ServerDefault,
-            )
-            .await;
+        let result = client.create_topic(&stream_id, name, &options).await;
         if let Err(error) = result
             && client.get_topic(&stream_id, &topic_id).await?.is_none()
         {

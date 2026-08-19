@@ -90,12 +90,12 @@ pub async fn prove_stale_holder_rejected(laser: &Laser) -> Result<(), LaserError
     let fence_key = "zombie-charge-proof";
     let old = laser
         .kv(&namespace)
-        .lease(fence_key, Duration::from_millis(100))
+        .lease(fence_key, "old-holder", Duration::from_millis(100))
         .await?;
     tokio::time::sleep(Duration::from_millis(150)).await;
     let current = laser
         .kv(&namespace)
-        .lease(fence_key, Duration::from_secs(2))
+        .lease(fence_key, "current-holder", Duration::from_secs(2))
         .await?;
     if current.token <= old.token {
         return Err(LaserError::Invalid(
@@ -105,7 +105,7 @@ pub async fn prove_stale_holder_rejected(laser: &Laser) -> Result<(), LaserError
     let current_key = format!("zombie/current/{}", current.token);
     laser
         .kv(&namespace)
-        .cas_fenced(&current_key, fence_key, current.token)
+        .cas_fenced(&current_key, &namespace, fence_key, current.token)
         .bytes("current-holder")
         .expect_absent()
         .commit()
@@ -113,7 +113,7 @@ pub async fn prove_stale_holder_rejected(laser: &Laser) -> Result<(), LaserError
     let stale_key = format!("zombie/stale/{}", old.token);
     let stale = laser
         .kv(&namespace)
-        .cas_fenced(&stale_key, fence_key, old.token)
+        .cas_fenced(&stale_key, &namespace, fence_key, old.token)
         .bytes("stale-holder")
         .expect_absent()
         .commit()
@@ -141,10 +141,11 @@ impl ChargeLedger for ManagedChargeLedger {
             LaserError::Invalid("a managed charge requires a workflow fence token".to_owned())
         })?;
         let key = order.to_string();
+        let namespace = KvSpace::Charges.to_string();
         match self
             .laser
-            .kv(KvSpace::Charges.to_string())
-            .cas_fenced(&key, &key, fence_token)
+            .kv(&namespace)
+            .cas_fenced(&key, namespace, &key, fence_token)
             .json(&amount)?
             .expect_absent()
             .commit()
