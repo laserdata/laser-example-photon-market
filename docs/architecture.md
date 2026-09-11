@@ -44,7 +44,7 @@ SIGKILL and machine loss cannot run cleanup. Recovery comes from the log, idempo
 
 | concern | local Laser Stack | LaserData Cloud |
 | --- | --- | --- |
-| order pipeline, agents, contracts, workflow | runs over the local VSR log | runs over the hosted VSR log |
+| order pipeline, agents, contracts, workflow | runs over the local log | runs over the hosted log |
 | inventory, charge, refund idempotency | key value compare and swap, cross process | key value compare and swap, cross process |
 | dashboards, order lookup | materialized indexes, query DSL, watch | materialized indexes, query DSL, watch |
 | memory | durable memory plus deterministic reranking | durable memory plus deterministic reranking |
@@ -52,4 +52,4 @@ SIGKILL and machine loss cannot run cleanup. Recovery comes from the log, idempo
 | connection | `iggy:laser@127.0.0.1:8090`, plaintext on loopback | deployment credentials, TLS CA attached automatically |
 | operations | two current Docker images and local volumes | hosted deployment and the full cloud experience |
 
-Laser SDK `0.0.1` uses VSR for both targets. Every managed surface is behind a capability check made once at startup. A managed operation returning unsupported after startup is an error, never a silent downgrade. The open Apache Iggy fallbacks remain explicit application implementations for baseline tests, but the default `just up` runtime uses Laser Stack and selects the managed paths.
+Every managed surface is behind a capability check made once at startup. A managed operation returning unsupported after startup is an error, never a silent downgrade. The open Apache Iggy fallbacks remain explicit application implementations for baseline tests, but the default `just up` runtime uses Laser Stack and selects the managed paths.

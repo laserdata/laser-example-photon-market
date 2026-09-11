@@ -9,13 +9,14 @@ services:
       IGGY_ROOT_USERNAME: ${LASER_IGGY_USERNAME:-iggy}
       IGGY_ROOT_PASSWORD: ${LASER_IGGY_PASSWORD:-laser}
       IGGY_TCP_ADDRESS: 0.0.0.0:8090
+      IGGY_NODE_ADVERTISED_ADDRESS: iggy
       IGGY_HTTP_ADDRESS: 0.0.0.0:3000
       IGGY_QUIC_ENABLED: "false"
       IGGY_WEBSOCKET_ENABLED: "false"
       IGGY_PLANE_ENABLED: "true"
       IGGY_PLANE_SOCKET_PATH: /run/laserdata/plane.sock
       IGGY_PLANE_REQUEST_TIMEOUT: 15s
-      IGGY_SYSTEM_PATH: /var/lib/iggy
+      IGGY_PATH: /var/lib/iggy
     cap_add:
       - SYS_NICE
     security_opt:

@@ -33,12 +33,13 @@ impl TestIggy {
             .with_env_var("IGGY_ROOT_PASSWORD", "laser")
             .with_env_var("IGGY_TCP_ENABLED", "true")
             .with_env_var("IGGY_TCP_ADDRESS", "0.0.0.0:8090")
+            .with_env_var("IGGY_NODE_ADVERTISED_ADDRESS", "127.0.0.1")
             .with_env_var("IGGY_HTTP_ENABLED", "true")
             .with_env_var("IGGY_HTTP_ADDRESS", "0.0.0.0:3000")
             .with_env_var("IGGY_QUIC_ENABLED", "false")
             .with_env_var("IGGY_WEBSOCKET_ENABLED", "false")
             .with_env_var("IGGY_PLANE_ENABLED", "false")
-            .with_env_var("IGGY_SYSTEM_PATH", "/tmp/iggy");
+            .with_env_var("IGGY_PATH", "/tmp/iggy");
         let container = image
             .start()
             .await

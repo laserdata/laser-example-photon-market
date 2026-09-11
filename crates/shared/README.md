@@ -24,7 +24,7 @@ The shared crate is the vocabulary every service speaks: versioned domain contra
 
 | concern | local Laser Stack | LaserData Cloud |
 | --- | --- | --- |
-| connection | `iggy:laser@127.0.0.1:8090` over VSR | deployment credentials over VSR, with the TLS CA attached automatically |
+| connection | `iggy:laser@127.0.0.1:8090` | deployment credentials, with the TLS CA attached automatically |
 | semantic seam | `DeterministicReranker` over log-backed durable memory | `DeterministicReranker` over log-backed durable memory |
 | managed surfaces | advertised by the local plane | advertised by the hosted plane |
 

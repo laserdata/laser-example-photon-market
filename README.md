@@ -10,7 +10,7 @@ just demo    # run the market until Ctrl+C
 just down    # stop Laser Stack and keep its data
 ```
 
-The local stack pulls the current `laserdatainc/iggy-server` and `laserdatainc/laser-plane` images and exposes Iggy on `127.0.0.1`. Its default connection is `iggy:laser@127.0.0.1:8090`, and Laser SDK `0.3.0` uses VSR unconditionally. Run `just down-clean` when you also want to delete the Iggy and plane volumes.
+The local stack pulls the current `laserdatainc/iggy-server` and `laserdatainc/laser-plane` images and exposes Iggy on `127.0.0.1`. Its default connection is `iggy:laser@127.0.0.1:8090`. Run `just down-clean` when you also want to delete the Iggy and plane volumes.
 
 The market keeps producing shopper sessions, orders, shipments, tickets, model replies, and random adversary acts. The local Laser Stack enables the same capability-gated projection, query, KV, graph, fork, watch, memory, and run paths as a supported managed deployment. Use `just demo-once` for the deterministic walkthrough that exits, or `just run-calm` for the long-running market without injected faults.
 
