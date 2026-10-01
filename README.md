@@ -35,7 +35,7 @@ LASER_LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=... just demo llm-anthropic
 | 10 minutes | use the [Laser SDK map](docs/sdk-map.md) | Which primitive should I copy, where is its canonical use, and where does it run? |
 | reference | open a [module README](#architecture) or run `cargo doc --workspace --no-deps --open` | What does one crate own, and which symbols should I read first? |
 
-The [Laser SDK tutorial](https://github.com/laserdata/laser-sdk/blob/main/docs/tutorial.md) teaches each primitive in isolation. Photon Market starts one level later: it shows how those primitives compose across independently runnable Rust services. The [AGDX specification](https://github.com/laserdata/laser-sdk/blob/main/docs/agdx.md) defines the protocol underneath.
+The [Laser SDK tutorial](https://github.com/laserdata/laser-sdk/blob/main/docs/tutorial.md) teaches each primitive in isolation. Photon Market starts one level later: it shows how those primitives compose across independently runnable Rust services. The [AGDX specification](https://github.com/laserdata/laser-sdk/blob/main/docs/agdx.md) defines the protocol underneath. [Frostline](https://github.com/laserdata/laser-example-frostline) is the companion example for consumer filters: one change feed, three teams reading only their slice, and a benchmark of how much payload never left the server.
 
 ## Architecture
 
