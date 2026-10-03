@@ -49,6 +49,7 @@ async fn build_consumer(laser: &Laser) -> Result<Consumer, LaserError> {
     BusinessTopic::OrderEvents
         .topic(laser)
         .consumer_group("storefront-tickets")
+        .consumer()
         .batch_length(100)
         .poll_interval(Duration::from_millis(20))
         .build()

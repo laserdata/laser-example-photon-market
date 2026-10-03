@@ -75,6 +75,7 @@ pub async fn start_order_fold(laser: &Laser) -> Result<Consumer, LaserError> {
     BusinessTopic::OrderEvents
         .topic(laser)
         .consumer_group("desk-order-lookup")
+        .consumer()
         .batch_length(200)
         .poll_interval(Duration::from_millis(20))
         .build()

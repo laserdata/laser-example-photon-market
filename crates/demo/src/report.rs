@@ -9,10 +9,10 @@ pub fn run_profile(
     factory: &LaserFactory,
     caps: &Capabilities,
 ) -> Result<(), ConfigError> {
-    let platform = if caps.is_open_only() {
-        "Apache Iggy, open streaming and fabric"
-    } else {
+    let platform = if caps.managed {
         "Laser Stack or LaserData Cloud, managed surfaces enabled"
+    } else {
+        "Apache Iggy, open streaming and fabric"
     };
     phase("run profile");
     fact("mode", mode);
