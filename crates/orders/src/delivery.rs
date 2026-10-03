@@ -15,6 +15,7 @@ pub async fn consumer(laser: &Laser) -> Result<Consumer, LaserError> {
     BusinessTopic::OrderEvents
         .topic(laser)
         .consumer_group("orders-delivery")
+        .consumer()
         .batch_length(100)
         .commit_policy(CommitPolicy::Disabled)
         .poll_interval(Duration::from_millis(20))

@@ -281,6 +281,7 @@ fn count(counts: &BTreeMap<String, u64>, key: &str) -> u64 {
 async fn build_consumer(topic: Topic, group: &str) -> Result<Consumer, LaserError> {
     topic
         .consumer_group(group)
+        .consumer()
         .batch_length(200)
         .poll_interval(Duration::from_millis(10))
         .build()

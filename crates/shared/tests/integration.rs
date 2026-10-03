@@ -33,5 +33,9 @@ async fn given_a_fresh_iggy_when_topics_are_bootstrapped_then_should_stay_open_o
         .await
         .expect("agent topics bootstrap");
 
-    assert!(laser.capabilities().await.is_open_only());
+    // Bootstrapping attaches no managed plane. The server image evaluates
+    // consumer filters on its own, so that native surface may be announced.
+    let capabilities = laser.capabilities().await;
+    assert!(!capabilities.managed);
+    assert!(capabilities.backends.is_empty());
 }
