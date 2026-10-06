@@ -12,9 +12,9 @@ version = "0.1.0"
 
 [workspace.dependencies]
 async-trait = { version = "0.1.92" }
-bon = { version = "3.10.1" }
+bon = { version = "3.10.2" }
 futures = { version = "0.3.34" }
-laser-sdk = { version = "0.5.2", features = ["managed", "schema-codecs", "sign"] }
+laser-sdk = { version = "0.6.0", features = ["managed", "schema-codecs", "sign"] }
 photon-adversary = { path = "crates/adversary" }
 photon-desk = { path = "crates/desk" }
 photon-insights = { path = "crates/insights" }
@@ -31,7 +31,7 @@ strum = { version = "0.28.0", features = ["derive"] }
 tempfile = { version = "3.27.0" }
 testcontainers-modules = { version = "0.15.0", features = ["http_wait"] }
 thiserror = { version = "2.0.21" }
-tokio = { version = "1.53.1", features = ["macros", "rt", "rt-multi-thread", "signal", "sync", "time"] }
+tokio = { version = "1.53.2", features = ["macros", "rt", "rt-multi-thread", "signal", "sync", "time"] }
 tracing = { version = "0.1.44" }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 ulid = { version = "3.0.0" }

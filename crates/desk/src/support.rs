@@ -216,7 +216,7 @@ impl SupportAgent {
         }
         match self.publish_refund(ticket, conversation, &event).await {
             Ok(()) => {}
-            Err(LaserError::StepUpRequired(scope)) if scope == REFUND_SCOPE => {
+            Err(LaserError::StepUpRequired { scope }) if scope == REFUND_SCOPE => {
                 let request = ApprovalRequest {
                     scope: scope.clone(),
                     ticket: ticket.ticket,
