@@ -70,5 +70,5 @@ pub fn managed_summary(caps: &Capabilities) {
     managed_or_skip("fork: the flash-sale what-if", caps.forks);
     managed_or_skip("graph: fraud ring traversal", caps.graph);
     managed_or_skip("watch: the dashboards change feed", caps.watch);
-    managed_or_skip("runs: the fulfillment run registry", caps.agent_workflow);
+    managed_or_skip("sessions: the fulfillment session index", caps.sessions);
 }

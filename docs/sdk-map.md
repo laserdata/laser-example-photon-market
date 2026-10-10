@@ -26,15 +26,15 @@ The substrate, wire, and open fabric run on Apache Iggy. Laser Stack adds the co
 | Consume with groups, dedup, retry, and dead-lettering | `ReliableConsumer` | [`spawn_consumer`](../crates/orders/src/lib.rs) | yes | yes |
 | Pin a topic's writer contract | typed topic plus schema id | [`events::Publisher`](../crates/orders/src/events.rs) | JSON Schema guard | JSON Schema guard |
 | Route work by advertised capability and deadline | `contract` plus `Router::to_capable` | [`OrdersHandler::screen`](../crates/orders/src/handler.rs) | yes | yes |
-| Ask every capable agent and accept a quorum | `AgentCtx::fan_out` | [`Fulfillment::handle`](../crates/orders/src/fulfillment.rs) | yes | yes |
-| Run steps with a journal, budget, verifier, and compensation | `workflow` | [`run_saga`](../crates/orders/src/saga.rs) | registered run | registered run |
+| Ask every capable agent and gather the verified replies | `Laser::scatter_report` | [`Fulfillment::handle`](../crates/orders/src/fulfillment.rs) | yes | yes |
+| Run steps with a journal, budget, verifier, and compensation | `workflow` | [`run_saga`](../crates/orders/src/saga.rs) | indexed session | indexed session |
 | Rebuild state after a process dies | typed replay and fold | [`recovery::rebuild`](../crates/orders/src/recovery.rs) | yes | yes |
 | Make inventory reservation idempotent | local fold or `kv` CAS | [`Inventory`](../crates/orders/src/inventory.rs) | cross-process CAS | cross-process CAS |
 | Reject a stale workflow holder at an effect boundary | fenced `kv` CAS | [`ManagedChargeLedger`](../crates/orders/src/charge.rs) | fenced CAS | fenced CAS |
 | Remember and semantically recall facts | `memory` | [`RiskAgent`](../crates/desk/src/risk.rs) | durable memory | durable memory |
 | Traverse fraud relationships | `graph` | [`RiskLinks`](../crates/desk/src/links.rs) | knowledge graph | knowledge graph |
 | Ground support answers in order truth | replay or `query` | [`OrderReader`](../crates/desk/src/order_lookup.rs) | orders projection | orders projection |
-| Pause an effect for a bound approval | action governor plus `approval_gate` | [`DeskGovernor`](../crates/desk/src/governor.rs) | yes | yes |
+| Pause an effect for a bound approval | action governor plus `request_input_from` | [`DeskGovernor`](../crates/desk/src/governor.rs) | yes | yes |
 | Stream replayable model output | AGDX chunk stream | [`SupportAgent`](../crates/desk/src/support.rs) | yes | yes |
 | Declare queryable read models | `Projection` and `ProjectionBinding` | [`projections::register`](../crates/insights/src/projections.rs) | projections and query | projections and query |
 | Await a materialized view advance | `watch` | [`watch_loop`](../crates/insights/src/managed.rs) | change feed | change feed |

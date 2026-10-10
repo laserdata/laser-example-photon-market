@@ -247,7 +247,7 @@ impl OrdersHandler {
             ))
             .from(AppAgent::Orders.id())
             .payload(payload)
-            .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+            .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
             .deadline(SCREEN_DEADLINE)
             .send()
             .await?;

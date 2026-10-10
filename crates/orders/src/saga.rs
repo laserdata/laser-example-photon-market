@@ -4,7 +4,7 @@ use crate::fulfillment::FulfillmentTask;
 use crate::inventory::Inventory;
 use crate::quotes::{self, QuotePanel};
 use laser_sdk::agent::OnTimeout;
-use laser_sdk::prelude::full::{Budget, InboxRoute, Router, StepContext};
+use laser_sdk::prelude::full::{InboxRoute, Router, StepContext, WorkflowBudget};
 use laser_sdk::prelude::{AgentTopic, Laser, LaserError};
 use photon_shared::ShutdownWatch;
 use photon_shared::domain::Timestamp;
@@ -95,21 +95,17 @@ pub async fn run_saga(
     let (quote_switch, book_switch, dispatch_switch) =
         (switch.clone(), switch.clone(), switch.clone());
 
-    let mut workflow = laser
+    // The run is a session keyed by the order, so the session index answers
+    // "what happened to order X" wherever the deployment serves it.
+    let workflow = laser
         .workflow("fulfillment")
         .run_id(run_id)
-        .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+        .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
         .budget(
-            Budget::unlimited()
+            WorkflowBudget::unlimited()
                 .invocations(8)
                 .wall_clock(Duration::from_secs(60)),
         );
-    // Register the run so `laser.runs()` can answer "what happened to order X",
-    // only when the deployment serves the run registry. Raw Apache Iggy does not,
-    // so the run stays local there.
-    if laser.capabilities().await.agent_workflow {
-        workflow = workflow.registered();
-    }
     let charge_step = workflow
         .step(
             "charge",

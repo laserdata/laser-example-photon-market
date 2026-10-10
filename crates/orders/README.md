@@ -10,7 +10,7 @@ Orders owns the order lifecycle: intake with deduplication, inventory truth, ris
 | `catalog.commands` | `CatalogCommand` | consumed by `CatalogHandler`: `UpsertSku` sets stock absolutely (seeding), `Restock` adds to it (repair) |
 | `order.events` | `OrderEvent` | published for every lifecycle fact, schema guarded when managed |
 | `screen_order` contract | `ScreenRequest` | sent by capability with a deadline, no reply fails closed |
-| `quote_shipment`, `book_shipment` | `CarrierRequest` | quorum fan-out, then a directed booking with runner-up fallback |
+| `quote_shipment`, `book_shipment` | `CarrierRequest` | verified scatter, then a directed booking with runner-up fallback |
 | `fulfillment` workflow | `FulfillmentTask` | charge, quote, book, dispatch with reverse compensations |
 | `orders-delivery` group | `OrderEvent` | tails shipments, publishes delivery, then commits the shipment offset |
 
@@ -30,7 +30,7 @@ Orders owns the order lifecycle: intake with deduplication, inventory truth, ris
 | inventory | `ManagedInventory` KV compare-and-swap, cross process | `ManagedInventory` KV compare-and-swap, cross process |
 | charge idempotency | `ManagedChargeLedger` fenced CAS, stale holders rejected | `ManagedChargeLedger` fenced CAS, stale holders rejected |
 | `order.events` schema guard | JSON Schema enforced on publish | JSON Schema enforced on publish |
-| run registry | registered through the runs API | registered through the runs API |
+| fulfillment runs | indexed as sessions keyed by the order | indexed as sessions keyed by the order |
 
 ## Focused tests
 

@@ -90,9 +90,9 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
     rebuild_risk_links(&connection, links.as_ref()).await?;
     let risk = Agent::builder()
         .id(AppAgent::Risk.id())
-        .listen_on(AgentTopic::Commands)
-        .respond_on(AgentTopic::Responses)
-        .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+        .listen_on(AgentTopic::Sessions)
+        .respond_on(AgentTopic::Sessions)
+        .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
         .concurrency(ConcurrencyPolicy::SerialPerPartition { max_partitions: 8 })
         .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
         .capabilities(vec![CapabilityDescriptor {
@@ -140,7 +140,7 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
 
     let reviewer = Agent::builder()
         .id(AppAgent::Reviewer.id())
-        .listen_on(AgentTopic::HumanInput)
+        .listen_on(AgentTopic::Sessions)
         .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
         .maybe_signing_key(factory.signing_key(AppAgent::Reviewer))
         .handler(ReviewerAgent)

@@ -1,7 +1,7 @@
 use crate::charge::{ChargeLedger, ChargeOutcome, RefundOutcome};
 use crate::events;
 use crate::quotes::{AttributedQuote, QuotePanel};
-use laser_sdk::prelude::full::{CapabilitySelector, GatherPolicy, InboxRoute, RoutePolicy};
+use laser_sdk::prelude::full::{CapabilitySelector, InboxRoute, RoutePolicy};
 use laser_sdk::prelude::{
     AgentCtx, AgentHandler, AgentId, AgentMessage, AgentTopic, Contract, LaserError, Router,
 };
@@ -16,7 +16,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use tracing::{debug, info, warn};
 
-const QUORUM: usize = 2;
 const QUOTE_DEADLINE: Duration = Duration::from_secs(5);
 const BOOK_DEADLINE: Duration = Duration::from_secs(5);
 
@@ -144,24 +143,33 @@ impl AgentHandler for Fulfillment {
                     serde_json::to_vec(&CarrierRequest::Quote(request)).map_err(encode_error)?;
                 let selector =
                     CapabilitySelector::new(Skill::QuoteShipment.to_string(), RoutePolicy::Any);
-                let gather = match ctx
-                    .fan_out(
-                        selector,
-                        payload,
-                        GatherPolicy::Quorum(QUORUM),
+                // Contracts carry signed replies, which a verifying connection
+                // requires. A plain fan-out reply would never be accepted.
+                let report = match ctx
+                    .laser()
+                    .scatter_report(
+                        AppAgent::Fulfillment.id(),
+                        &selector,
+                        &payload,
+                        &InboxRoute::Fixed(AgentTopic::Sessions),
                         QUOTE_DEADLINE,
                     )
                     .await
                 {
-                    Ok(gather) => gather,
+                    Ok(report) => report,
                     Err(error) => {
-                        warn!("Carrier quote fan-out failed for order {order}. {error}");
+                        warn!("Carrier quote scatter failed for order {order}. {error}");
                         return Err(error);
                     }
                 };
-                let quotes = gather
-                    .ok
-                    .iter()
+                for outcome in &report.outcomes {
+                    if !matches!(outcome.result, Ok(Contract::Completed(_))) {
+                        let agent = &outcome.agent;
+                        debug!("Carrier {agent} gave no quote for order {order}");
+                    }
+                }
+                let quotes = report
+                    .completed()
                     .filter_map(|(agent, reply)| {
                         let quote: photon_shared::domain::shipping::Quote =
                             serde_json::from_slice(reply.body()).ok()?;
@@ -289,7 +297,7 @@ async fn release_with_carrier(ctx: &AgentCtx<'_>, order: OrderId, carrier: &str)
         .contract(Router::to(carrier_id))
         .from(AppAgent::Fulfillment.id())
         .payload(payload)
-        .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+        .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
         .deadline(BOOK_DEADLINE)
         .send()
         .await;
@@ -322,7 +330,7 @@ async fn try_book(
         .contract(Router::to(carrier_id))
         .from(AppAgent::Fulfillment.id())
         .payload(payload)
-        .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+        .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
         .deadline(BOOK_DEADLINE)
         .send()
         .await?;

@@ -103,13 +103,13 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
     } else {
         output::gate("projection watch feed", false);
     }
-    if capabilities.agent_workflow {
-        handle.track(tokio::spawn(managed::run_registry_loop(
+    if capabilities.sessions {
+        handle.track(tokio::spawn(managed::session_index_loop(
             laser.clone(),
             handle.watch(),
         )));
     } else {
-        output::gate("registered workflow run listing", false);
+        output::gate("fulfillment session listing", false);
     }
     if capabilities.forks {
         handle.track(tokio::spawn(managed::flash_sale(laser.clone(), apply_plan)));
