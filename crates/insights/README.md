@@ -1,6 +1,6 @@
 # Photon insights
 
-Insights is the read side and owns no truth: it derives everything from the log. On Laser Stack and LaserData Cloud it registers queryable projections and adds watch feeds, the workflow run registry, and a fork-based what-if. It also folds live dashboards in process and audits the governor's policy-evidence chains for tamper.
+Insights is the read side and owns no truth: it derives everything from the log. On Laser Stack and LaserData Cloud it registers queryable projections and adds watch feeds, a session index listing of fulfillment runs, and a fork-based what-if. It also folds live dashboards in process and audits the governor's policy-evidence chains for tamper.
 
 ## Owned topics and contracts
 
@@ -24,7 +24,7 @@ Insights is the read side and owns no truth: it derives everything from the log.
 | --- | --- | --- |
 | dashboards, order lookup | materialized indexes, query DSL | materialized indexes, query DSL |
 | change feeds | projection watch feed | projection watch feed |
-| run registry, forks | live | live |
+| session index, forks | live | live |
 | evidence chain audit | runs | runs |
 
 ## Focused tests

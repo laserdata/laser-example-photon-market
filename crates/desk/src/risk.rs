@@ -1,8 +1,8 @@
 use crate::approvals::effect_digest;
 use crate::links::RiskLinks;
-use crate::reviewer::ApprovalDecision;
+use crate::reviewer::{ApprovalDecision, ask_reviewer};
 use laser_sdk::prelude::{
-    AgentCtx, AgentHandler, AgentMessage, AgentTopic, ConversationId, LaserError, MemoryHandle,
+    AgentCtx, AgentHandler, AgentMessage, ConversationId, LaserError, MemoryHandle,
 };
 use photon_shared::domain::risk::{RiskCaseEvent, RiskReason, RiskVerdict, ScreenRequest};
 use photon_shared::domain::{ContractVersion, CustomerId, OrderId, Timestamp};
@@ -194,10 +194,7 @@ impl RiskAgent {
         let prompt = serde_json::to_vec(&review).map_err(|error| {
             LaserError::Invalid(format!("cannot encode review request: {error}"))
         })?;
-        let approved = match ctx
-            .approval_gate(AgentTopic::Responses, prompt, REVIEW_DEADLINE)
-            .await
-        {
+        let approved = match ask_reviewer(ctx, AppAgent::Risk, prompt, REVIEW_DEADLINE).await {
             Ok(response) => {
                 let decision: ApprovalDecision =
                     serde_json::from_slice(&response).map_err(|error| {

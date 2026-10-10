@@ -17,8 +17,8 @@ sequenceDiagram
     O->>D: screen_order contract when required
     D-->>O: clear or reject
     O->>O: charge through a journaled workflow
-    O->>C: quote_shipment fan-out
-    C-->>O: verified quote quorum
+    O->>C: quote_shipment scatter
+    C-->>O: signed carrier quotes
     O->>C: book winning carrier
     O->>I: order.events
     D->>I: risk.events
@@ -67,7 +67,7 @@ A durable decision makes redelivery a no-op. A `Reserved` order resumes screenin
 - device and card rings from `RiskLinks`
 - prior customer verdicts from memory
 
-A review case carries a SHA-256 digest of the exact request. `AgentCtx::approval_gate` waits for `ReviewerAgent`. The reply must echo the digest. A mismatch, rejection, or timeout fails closed.
+A review case carries a SHA-256 digest of the exact request. `ask_reviewer` sends it to `ReviewerAgent` with `request_input_from` and waits for the answer. The reply must echo the digest. A mismatch, rejection, or timeout fails closed.
 
 The desk publishes `RiskCaseEvent` to `risk.events` and returns the same typed event as the contract reply.
 
@@ -78,13 +78,13 @@ The desk publishes `RiskCaseEvent` to `risk.events` and returns the same typed e
 | step | action | compensation |
 | --- | --- | --- |
 | charge | idempotent charge | refund |
-| quote | verified carrier quorum | none |
+| quote | verified carrier quotes | none |
 | book | directed carrier booking | release booking |
 | dispatch | emit `Shipped` | none |
 
 `Fulfillment::handle` in `crates/orders/src/fulfillment.rs` executes each task.
 
-The quote step calls `AgentCtx::fan_out` for every agent advertising `quote_shipment`. Replies count only when the contract version, order ID, and sender identity match. `QuotePanel::ranked` in `crates/orders/src/quotes.rs` rejects non-positive or implausible quotes. Borealis therefore cannot win with its negative quote.
+The quote step calls `Laser::scatter_report` to contract every agent advertising `quote_shipment`. Replies count only when the contract version, order ID, and sender identity match. `QuotePanel::ranked` in `crates/orders/src/quotes.rs` rejects non-positive or implausible quotes. Borealis therefore cannot win with its negative quote.
 
 Booking first tries the best verified quote, then the runner-up. Honest carriers return the same booking for a redelivered request.
 
@@ -96,7 +96,7 @@ On failure, the workflow compensates in reverse. `supervise` then releases the i
 
 `Dashboards` in `crates/insights/src/dashboards.rs` folds shop events, order events, dead letters, and policy evidence. Replay cannot inflate policy activity because evidence is deduplicated by decision ID.
 
-On Laser Stack and LaserData Cloud, `projections::register` declares the `orders`, `shop_events`, `tickets`, and `risk_cases` indexes. `managed.rs` demonstrates grouped queries, watch feeds, workflow runs, and a forked flash-sale change. Producers are unchanged.
+On Laser Stack and LaserData Cloud, `projections::register` declares the `orders`, `shop_events`, `tickets`, and `risk_cases` indexes. `managed.rs` demonstrates grouped queries, watch feeds, the session index of fulfillment runs, and a forked flash-sale change. Producers are unchanged.
 
 ## 6. Provenance
 

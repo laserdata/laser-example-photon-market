@@ -3,24 +3,14 @@ use laser_sdk::iggy::prelude::{
     CompressionAlgorithm, Identifier, IggyExpiry, MaxTopicSize, StreamClient, TopicClient,
     TopicCreateOptions,
 };
-use laser_sdk::prelude::{AgentTopic, Laser, LaserError};
+use laser_sdk::prelude::{AgentTopic, Laser, LaserError, TopicRetention};
 use std::collections::{HashMap, HashSet};
+use std::time::Duration;
 use strum::IntoEnumIterator;
 
 pub const PARTITIONS: u32 = 4;
 
-const AGENT_TOPICS: [AgentTopic<'static>; 10] = [
-    AgentTopic::Audit,
-    AgentTopic::Commands,
-    AgentTopic::Dlq,
-    AgentTopic::HumanInput,
-    AgentTopic::LlmIo,
-    AgentTopic::Responses,
-    AgentTopic::Registry,
-    AgentTopic::ToolCalls,
-    AgentTopic::ToolResults,
-    AgentTopic::WorkflowJournal,
-];
+const SESSION_RETENTION: Duration = Duration::from_secs(7 * 24 * 60 * 60);
 
 pub async fn bootstrap_all(laser: &Laser) -> Result<(), LaserError> {
     ensure_owned(laser, BusinessTopic::iter()).await?;
@@ -54,9 +44,17 @@ pub async fn ensure_owned(
     Ok(())
 }
 
+// The session lane, heartbeats, and agent satellites come from the SDK's own
+// bootstrap, which applies the retention each one needs and registers the
+// stream as a session source where the deployment indexes sessions. The
+// registry topic is otherwise created by the first card, so it is ensured here
+// for readers that start before any agent advertises.
 pub async fn ensure_agent_topics(laser: &Laser) -> Result<(), LaserError> {
-    let names: Vec<String> = AGENT_TOPICS.iter().map(AgentTopic::topic_string).collect();
-    ensure_stream_topics(laser, STREAM, &names).await
+    laser
+        .sessions()
+        .bootstrap(PARTITIONS, TopicRetention::expire_after(SESSION_RETENTION))
+        .await?;
+    ensure_stream_topics(laser, STREAM, &[AgentTopic::Registry.topic_string()]).await
 }
 
 async fn ensure_stream_topics(

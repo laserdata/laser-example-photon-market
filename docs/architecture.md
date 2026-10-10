@@ -48,7 +48,7 @@ SIGKILL and machine loss cannot run cleanup. Recovery comes from the log, idempo
 | inventory, charge, refund idempotency | key value compare and swap, cross process | key value compare and swap, cross process |
 | dashboards, order lookup | materialized indexes, query DSL, watch | materialized indexes, query DSL, watch |
 | memory | durable memory plus deterministic reranking | durable memory plus deterministic reranking |
-| graph, forks, run registry, schema guard, fenced exclusivity | live through the local plane | live through the hosted plane |
+| graph, forks, session index, schema guard, fenced exclusivity | live through the local plane | live through the hosted plane |
 | connection | `iggy:laser@127.0.0.1:8090`, plaintext on loopback | deployment credentials, TLS CA attached automatically |
 | operations | two current Docker images and local volumes | hosted deployment and the full cloud experience |
 

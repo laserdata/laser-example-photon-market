@@ -1,8 +1,10 @@
 use crate::governor::REFUND_SCOPE;
 use crate::risk::{RISK_SCOPE, RiskReviewRequest};
-use laser_sdk::prelude::{AgentCtx, AgentHandler, AgentMessage, LaserError};
+use laser_sdk::prelude::{AgentCtx, AgentHandler, AgentMessage, AgentTopic, LaserError};
 use photon_shared::domain::{Money, OrderId, TicketId};
+use photon_shared::names::AppAgent;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 /// The reviewer clears a ring- or precedent-flagged order only under this
 /// value. Anything dearer flagged by a link stays rejected.
@@ -32,6 +34,29 @@ struct Scoped {
 
 pub struct ReviewerAgent;
 
+// Every desk and order agent shares the session topic, so an approval prompt
+// names the reviewer. An unaddressed prompt would be work for all of them.
+pub async fn ask_reviewer(
+    ctx: &AgentCtx<'_>,
+    asker: AppAgent,
+    prompt: Vec<u8>,
+    timeout: Duration,
+) -> Result<Vec<u8>, LaserError> {
+    ctx.laser()
+        .agdx(
+            AgentTopic::Sessions,
+            asker.id().wire_id(),
+            ctx.message().provenance.conversation_id.into(),
+        )
+        .request_input_from(
+            AppAgent::Reviewer.id().wire_id(),
+            AgentTopic::Sessions,
+            prompt,
+            timeout,
+        )
+        .await
+}
+
 impl AgentHandler for ReviewerAgent {
     async fn handle(&self, message: &AgentMessage, ctx: &AgentCtx<'_>) -> Result<(), LaserError> {
         let scoped: Scoped = serde_json::from_slice(message.body()).map_err(|error| {
@@ -52,8 +77,7 @@ impl AgentHandler for ReviewerAgent {
         };
         let response = serde_json::to_vec(&decision)
             .map_err(|error| LaserError::Invalid(format!("approval decision failed: {error}")))?;
-        ctx.respond_input(laser_sdk::prelude::AgentTopic::Responses, response)
-            .await
+        ctx.respond_input(AgentTopic::Sessions, response).await
     }
 }
 

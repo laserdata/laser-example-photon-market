@@ -2,7 +2,7 @@ use crate::approvals::{ApprovalGrants, effect_digest};
 use crate::governor::REFUND_SCOPE;
 use crate::order_lookup::OrderReader;
 use crate::refunds::RefundLedger;
-use crate::reviewer::{ApprovalDecision, ApprovalRequest};
+use crate::reviewer::{ApprovalDecision, ApprovalRequest, ask_reviewer};
 use laser_sdk::prelude::AgentTopic;
 use laser_sdk::prelude::full::{ContextAssembler, LastN, SessionPolicy};
 use laser_sdk::prelude::{
@@ -166,7 +166,7 @@ impl SupportAgent {
         let mut stream = self
             .laser
             .agdx(
-                AgentTopic::LlmIo,
+                AgentTopic::Sessions,
                 AppAgent::Support.id().wire_id(),
                 session.into(),
             )
@@ -228,9 +228,8 @@ impl SupportAgent {
                 let prompt = serde_json::to_vec(&request).map_err(|error| {
                     LaserError::Invalid(format!("approval request failed: {error}"))
                 })?;
-                let response = ctx
-                    .approval_gate(AgentTopic::Responses, prompt, Duration::from_secs(15))
-                    .await;
+                let response =
+                    ask_reviewer(ctx, AppAgent::Support, prompt, Duration::from_secs(15)).await;
                 match response {
                     Ok(response) => {
                         let decision: ApprovalDecision = serde_json::from_slice(&response)

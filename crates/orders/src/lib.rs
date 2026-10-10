@@ -95,9 +95,9 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
         let connection = factory.connect(names::STREAM).await?;
         let agent = Agent::builder()
             .id(carrier.carrier.id())
-            .listen_on(AgentTopic::Commands)
-            .respond_on(AgentTopic::Responses)
-            .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+            .listen_on(AgentTopic::Sessions)
+            .respond_on(AgentTopic::Sessions)
+            .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
             .concurrency(ConcurrencyPolicy::SerialPerPartition { max_partitions: 8 })
             .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
             .capabilities(vec![
@@ -122,9 +122,9 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
         let connection = factory.connect(names::STREAM).await?;
         let agent = Agent::builder()
             .id(AppAgent::Fulfillment.id())
-            .listen_on(AgentTopic::Commands)
-            .respond_on(AgentTopic::Responses)
-            .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+            .listen_on(AgentTopic::Sessions)
+            .respond_on(AgentTopic::Sessions)
+            .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
             .concurrency(ConcurrencyPolicy::SerialPerPartition { max_partitions: 8 })
             .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
             .maybe_signing_key(factory.signing_key(AppAgent::Fulfillment))

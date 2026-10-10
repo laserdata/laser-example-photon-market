@@ -63,9 +63,9 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
     let connection = factory.connect(names::STREAM).await?;
     let borealis = Agent::builder()
         .id(AppAgent::Borealis.id())
-        .listen_on(AgentTopic::Commands)
-        .respond_on(AgentTopic::Responses)
-        .inbox_route(InboxRoute::Fixed(AgentTopic::Commands))
+        .listen_on(AgentTopic::Sessions)
+        .respond_on(AgentTopic::Sessions)
+        .inbox_route(InboxRoute::Fixed(AgentTopic::Sessions))
         .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
         .capabilities(vec![
             CapabilityDescriptor {

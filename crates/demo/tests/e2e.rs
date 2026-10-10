@@ -541,7 +541,7 @@ async fn screen(
         ))
         .from(AppAgent::Orders.id())
         .payload(payload)
-        .inbox_route(InboxRoute::Fixed(laser_sdk::prelude::AgentTopic::Commands))
+        .inbox_route(InboxRoute::Fixed(laser_sdk::prelude::AgentTopic::Sessions))
         .deadline(Duration::from_secs(10))
         .send()
         .await
@@ -1047,7 +1047,7 @@ async fn wait_for_chat(laser: &Laser, session: ConversationId, ticket: TicketId)
     loop {
         let messages = ContextAssembler::builder()
             .conversation_id(session)
-            .topics(vec![laser_sdk::prelude::AgentTopic::LlmIo])
+            .topics(vec![laser_sdk::prelude::AgentTopic::Sessions])
             .build()
             .assemble(laser)
             .await
@@ -1060,7 +1060,7 @@ async fn wait_for_chat(laser: &Laser, session: ConversationId, ticket: TicketId)
             })
         }) {
             let events = laser
-                .reassemble_channel(session, laser_sdk::prelude::AgentTopic::LlmIo, channel)
+                .reassemble_channel(session, laser_sdk::prelude::AgentTopic::Sessions, channel)
                 .await
                 .expect("chat stream reassembles");
             if events.iter().any(|event| {

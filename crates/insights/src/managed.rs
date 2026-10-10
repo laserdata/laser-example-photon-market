@@ -1,7 +1,7 @@
 use laser_sdk::prelude::{Laser, LaserError};
 use laser_sdk::wire::schema::{OFFSET_FIELD_NAME, PARTITION_ID_FIELD_NAME};
 use photon_shared::ShutdownWatch;
-use photon_shared::names::Index;
+use photon_shared::names::{AppAgent, Index};
 use std::time::Duration;
 use tracing::{info, warn};
 
@@ -49,16 +49,18 @@ pub async fn watch_loop(laser: Laser, mut shutdown: ShutdownWatch) {
     }
 }
 
-pub async fn run_registry_loop(laser: Laser, mut shutdown: ShutdownWatch) {
+pub async fn session_index_loop(laser: Laser, mut shutdown: ShutdownWatch) {
+    let sessions = laser.sessions();
+    let fulfillment = AppAgent::Fulfillment.id().wire_id();
     loop {
         tokio::select! {
             _ = shutdown.cancelled() => break,
-            _ = tokio::time::sleep(Duration::from_secs(4)) => match laser.runs().list().agent("fulfillment").limit(20).fetch().await {
+            _ = tokio::time::sleep(Duration::from_secs(4)) => match sessions.list().agent(fulfillment.clone()).limit(20).fetch().await {
                 Ok(page) => {
-                    let runs = page.runs.len();
-                    info!("Managed fulfillment registry currently lists {runs} recent run(s)");
+                    let runs = page.items.len();
+                    info!("Managed session index currently lists {runs} recent fulfillment session(s)");
                 }
-                Err(error) => warn!("Managed run registry query failed: {error}"),
+                Err(error) => warn!("Managed session index query failed: {error}"),
             }
         }
     }

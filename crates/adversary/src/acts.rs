@@ -1,4 +1,4 @@
-use laser_sdk::prelude::{AgentTopic, ConversationId, Laser, LaserError, Provenance};
+use laser_sdk::prelude::{AgentTopic, ConversationId, Laser, LaserError, MessageId, Provenance};
 use laser_sdk::wire::agent::AgentCard;
 use photon_shared::domain::order::PlaceOrder;
 use photon_shared::domain::shipping::Booking;
@@ -43,7 +43,7 @@ pub async fn duplicate_flood(laser: &Laser, seed: u64) -> Result<OrderId, LaserE
     Ok(order)
 }
 
-// Flood the shared reply topic with fabricated booking confirmations carrying
+// Flood the session topic with fabricated booking confirmations carrying
 // guessed correlation ids. A contract waiter only completes on its own live
 // correlation, so the forged replies are ignored and the fleet keeps flowing.
 pub async fn unsolicited_replies(laser: &Laser, seed: u64) -> Result<(), LaserError> {
@@ -61,9 +61,10 @@ pub async fn unsolicited_replies(laser: &Laser, seed: u64) -> Result<(), LaserEr
             .conversation_id(conversation(order))
             .agent(AppAgent::Borealis.id())
             .correlation_id(format!("forged-{seed}-{copy}"))
+            .causal_parent(MessageId::new(0, seed + copy as u64))
             .build();
         laser
-            .send_agent(AgentTopic::Responses, body, &stamped)
+            .send_agent(AgentTopic::Sessions, body, &stamped)
             .await?;
     }
     Ok(())

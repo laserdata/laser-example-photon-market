@@ -91,7 +91,7 @@ This is the short inventory. The [Laser SDK map](docs/sdk-map.md) links every su
 | discovery, cards, presence, signed quarantine | orders (carriers), adversary |
 | knowledge graph, memory, sessions, chunk streams | desk |
 | approval gates, action governor | desk |
-| projections, query DSL, watch, forks, run registry | insights |
+| projections, query DSL, watch, forks, session index | insights |
 
 ## Agents and coordination
 
@@ -101,7 +101,7 @@ The order lifecycle shows the full fabric:
 
 - **Contracts.** A high value order holds until the desk clears it. `orders` sends a `screen_order` contract routed by capability, with a deadline. A completed reply releases the order, a failure rejects it, a timeout parks it in manual review.
 - **Workflow saga.** Each accepted order runs one journalled workflow: charge, quote, book, dispatch. Failure anywhere runs compensations in reverse. The run carries a budget and a stable run id, so a restart resumes from the journal instead of repeating a charge.
-- **Scatter and gather.** The quote step fans out to every carrier advertising `quote_shipment` and takes a quorum, so one slow or lying carrier cannot starve the step. A verifier panel rejects an absurd quote before money moves.
+- **Scatter and gather.** The quote step contracts every carrier advertising `quote_shipment` and keeps the signed replies that land before the deadline, so one slow or lying carrier cannot starve the step. A verifier panel rejects an absurd quote before money moves.
 - **Discovery and trust.** Carriers are discovered through cards, not hardcoded. Identity is a claim, effects need fences, and outputs need verification. Under the demo verifier every capability agent signs its contract replies, and the reviewer signs interrupt decisions, so a screening, saga-step, booking terminal, or approval is accepted only when its signature verifies and binds to the routed target. A rogue carrier is quarantined with a signed operator fact and later released with another. A forged unsigned quarantine and an impersonator's fabricated reply are both ignored.
 
 The desk adds the agentic memory and safety story:

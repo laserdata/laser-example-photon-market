@@ -46,12 +46,14 @@ services:
       - iggy
     environment:
       LD_PLANE_IGGY_URL: tcp://iggy:8090
+      LD_PLANE_IGGY_HTTP_URL: http://iggy:3000
       LD_PLANE_IGGY_USERNAME: ${LASER_IGGY_USERNAME:-iggy}
       LD_PLANE_IGGY_PASSWORD: ${LASER_IGGY_PASSWORD:-laser}
       LD_PLANE_IGGY_TLS_DISABLED: "true"
       LD_PLANE_QUERY_SOCKET: /run/laserdata/plane.sock
       LD_PLANE_DB_PATH: /var/lib/laser-plane/index.db
-      LD_PLANE_HEALTH_ADDR: 0.0.0.0:8089
+      LD_PLANE_HEALTH_ADDR: 127.0.0.1:8089
+      LD_PLANE_INTERNAL_API_TOKEN: ${LASER_PLANE_INTERNAL_API_TOKEN:-laser-plane-internal}
     volumes:
       - laser-plane-data:/var/lib/laser-plane
       - laser-plane-run:/run/laserdata
