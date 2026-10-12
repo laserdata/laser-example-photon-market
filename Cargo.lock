@@ -2248,9 +2248,9 @@ dependencies = [
 
 [[package]]
 name = "laser-sdk"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "059fd32b99dd068b8e506955dd1666f0ff72139ea7a82128f513d5ef09fd89d6"
+checksum = "75201eb792fbc418c6ba65ade19d62836c22f6d57ecc50f84a6b90b9532ca1a0"
 dependencies = [
  "apache-avro",
  "async-trait",
@@ -2280,9 +2280,9 @@ dependencies = [
 
 [[package]]
 name = "laser-wire"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "683c156c353c9656b781c7bcd2eeb4eaddb526ff6d1a7e6b750aed784a196c6b"
+checksum = "b2a121ba5f11d91cceb946f3dd9dfb6c1459b7ccdfe208e59ff967644cb6d696"
 dependencies = [
  "apache-avro",
  "bon",
