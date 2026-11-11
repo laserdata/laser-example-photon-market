@@ -241,6 +241,7 @@ mod tests {
             payload,
             signed: false,
             counters: ActionCounters::default(),
+            approval: None,
         }
     }
 }

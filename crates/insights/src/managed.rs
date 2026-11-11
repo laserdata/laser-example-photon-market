@@ -27,7 +27,7 @@ pub async fn query_loop(laser: Laser, mut shutdown: ShutdownWatch) {
 
 pub async fn watch_loop(laser: Laser, mut shutdown: ShutdownWatch) {
     let orders = Index::Orders.to_string();
-    let mut feed = match laser.watch().index(&orders).records() {
+    let mut feed = match laser.watch().index(&orders).records().await {
         Ok(feed) => feed,
         Err(error) => {
             warn!("Managed order watch could not start: {error}");
@@ -55,7 +55,7 @@ pub async fn session_index_loop(laser: Laser, mut shutdown: ShutdownWatch) {
     loop {
         tokio::select! {
             _ = shutdown.cancelled() => break,
-            _ = tokio::time::sleep(Duration::from_secs(4)) => match sessions.list().agent(fulfillment.clone()).limit(20).fetch().await {
+            _ = tokio::time::sleep(Duration::from_secs(4)) => match sessions.list().agent(fulfillment.clone()).results(20).fetch().await {
                 Ok(page) => {
                     let runs = page.items.len();
                     info!("Managed session index currently lists {runs} recent fulfillment session(s)");

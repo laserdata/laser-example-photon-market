@@ -1,7 +1,7 @@
 use crate::names::{BusinessTopic, STREAM};
 use laser_sdk::iggy::prelude::{
-    CompressionAlgorithm, Identifier, IggyExpiry, MaxTopicSize, StreamClient, TopicClient,
-    TopicCreateOptions,
+    CompressionAlgorithm, Identifier, IggyExpiry, MaxTopicSize, StreamClient, StreamCreateOptions,
+    TopicClient, TopicCreateOptions,
 };
 use laser_sdk::prelude::{AgentTopic, Laser, LaserError, TopicRetention};
 use std::collections::{HashMap, HashSet};
@@ -66,7 +66,9 @@ async fn ensure_stream_topics(
     let stream_id = Identifier::named(stream)?;
 
     if client.get_stream(&stream_id).await?.is_none()
-        && let Err(error) = client.create_stream(stream).await
+        && let Err(error) = client
+            .create_stream(stream, &StreamCreateOptions::default())
+            .await
         && client.get_stream(&stream_id).await?.is_none()
     {
         return Err(error.into());

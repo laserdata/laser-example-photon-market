@@ -70,12 +70,13 @@ impl std::fmt::Display for Counts<'_> {
     }
 }
 
-/// Verifies the governor's per-conversation evidence chains as far as they can
-/// honestly be verified: each record must link to the digest of the previous
-/// record in its conversation, and a record with no predecessor is rendered as
-/// a visible segment start. The governor's chain state is process-local, so a
-/// restarted service legitimately begins a fresh segment. A non-empty
-/// predecessor that does not match the last seen digest is a real violation.
+/// Verifies the governor's evidence chains as far as they can honestly be
+/// verified: each record must link to the digest of the previous record in its
+/// chain, and a record with no predecessor is rendered as a visible segment
+/// start. Every governed service runs its own chain, so chains interleave
+/// within one conversation, and a restarted service begins a fresh one. A
+/// non-empty predecessor that does not match the last seen digest is a real
+/// violation.
 #[derive(Default)]
 pub struct EvidenceChains {
     last_digest: HashMap<String, String>,
@@ -91,17 +92,15 @@ impl EvidenceChains {
             return;
         }
         self.decisions += 1;
-        let conversation = evidence.conversation.clone().unwrap_or_default();
-        match (
-            &evidence.previous_digest,
-            self.last_digest.get(&conversation),
-        ) {
+        let conversation = evidence.conversation.as_deref().unwrap_or_default();
+        let chain = &evidence.chain_id;
+        match (&evidence.previous_digest, self.last_digest.get(chain)) {
             (None, _) => {
                 self.segments += 1;
                 let decision = &evidence.decision;
                 let outcome = &evidence.outcome;
                 info!(
-                    "Evidence segment starts for conversation {conversation}: decision {decision}, outcome {outcome} (fresh governor or restart boundary)"
+                    "Evidence segment {chain} starts for conversation {conversation}: decision {decision}, outcome {outcome} (fresh governor or restart boundary)"
                 );
             }
             (Some(previous), Some(last)) if previous == last => {}
@@ -109,12 +108,12 @@ impl EvidenceChains {
                 self.violations += 1;
                 let expected = last.map(String::as_str).unwrap_or("none");
                 warn!(
-                    "Evidence chain violation for conversation {conversation}: expected predecessor {expected}, got {previous}"
+                    "Evidence chain {chain} violation for conversation {conversation}: expected predecessor {expected}, got {previous}"
                 );
             }
         }
         self.last_digest
-            .insert(conversation, evidence.receipt_digest.clone());
+            .insert(chain.clone(), evidence.receipt_digest.clone());
     }
 }
 
@@ -283,7 +282,6 @@ async fn build_consumer(topic: Topic, group: &str) -> Result<Consumer, LaserErro
         .consumer_group(group)
         .consumer()
         .batch_length(200)
-        .poll_interval(Duration::from_millis(10))
         .build()
         .await
 }
@@ -315,9 +313,9 @@ mod tests {
     #[test]
     fn given_a_linked_chain_when_folded_then_should_count_one_segment_and_no_violation() {
         let mut chains = EvidenceChains::default();
-        chains.fold(&evidence("conv-1", "d1", None));
-        chains.fold(&evidence("conv-1", "d2", Some("d1")));
-        chains.fold(&evidence("conv-1", "d3", Some("d2")));
+        chains.fold(&evidence("chain-a", "d1", None));
+        chains.fold(&evidence("chain-a", "d2", Some("d1")));
+        chains.fold(&evidence("chain-a", "d3", Some("d2")));
         assert_eq!(
             (chains.decisions, chains.segments, chains.violations),
             (3, 1, 0)
@@ -325,10 +323,24 @@ mod tests {
     }
 
     #[test]
+    fn given_two_chains_interleaved_in_one_conversation_when_folded_then_should_count_two_segments_and_no_violation()
+     {
+        let mut chains = EvidenceChains::default();
+        chains.fold(&evidence("chain-a", "a1", None));
+        chains.fold(&evidence("chain-b", "b1", None));
+        chains.fold(&evidence("chain-a", "a2", Some("a1")));
+        chains.fold(&evidence("chain-b", "b2", Some("b1")));
+        assert_eq!(
+            (chains.decisions, chains.segments, chains.violations),
+            (4, 2, 0)
+        );
+    }
+
+    #[test]
     fn given_a_restart_boundary_when_folded_then_should_start_a_new_segment_not_a_violation() {
         let mut chains = EvidenceChains::default();
-        chains.fold(&evidence("conv-1", "d1", None));
-        chains.fold(&evidence("conv-1", "d2", None));
+        chains.fold(&evidence("chain-a", "d1", None));
+        chains.fold(&evidence("chain-b", "d2", None));
         assert_eq!(
             (chains.decisions, chains.segments, chains.violations),
             (2, 2, 0)
@@ -338,8 +350,8 @@ mod tests {
     #[test]
     fn given_a_mismatched_predecessor_when_folded_then_should_flag_a_violation() {
         let mut chains = EvidenceChains::default();
-        chains.fold(&evidence("conv-1", "d1", None));
-        chains.fold(&evidence("conv-1", "d3", Some("not-d1")));
+        chains.fold(&evidence("chain-a", "d1", None));
+        chains.fold(&evidence("chain-a", "d3", Some("not-d1")));
         assert_eq!(
             (chains.decisions, chains.segments, chains.violations),
             (2, 1, 1)
@@ -349,7 +361,7 @@ mod tests {
     #[test]
     fn given_replayed_evidence_when_folded_then_should_not_double_count_or_violate() {
         let mut chains = EvidenceChains::default();
-        let evidence = evidence("conv-1", "d1", None);
+        let evidence = evidence("chain-a", "d1", None);
         chains.fold(&evidence);
         chains.fold(&evidence);
         assert_eq!(
@@ -361,7 +373,7 @@ mod tests {
     #[test]
     fn given_attributed_evidence_when_folded_then_dashboard_should_show_agent_activity() {
         let mut dashboards = Dashboards::default();
-        let mut evidence = evidence("conv-1", "d1", None);
+        let mut evidence = evidence("chain-a", "d1", None);
         evidence.source = Some("desk".to_owned());
         dashboards.fold_evidence(&evidence);
         assert!(dashboards.to_string().contains("agents [desk=1]"));
@@ -381,7 +393,7 @@ mod tests {
         );
     }
 
-    fn evidence(conversation: &str, digest: &str, previous: Option<&str>) -> PolicyEvidence {
+    fn evidence(chain: &str, digest: &str, previous: Option<&str>) -> PolicyEvidence {
         PolicyEvidence {
             decision_id: format!("decision-{digest}"),
             decision: "allow".to_owned(),
@@ -391,7 +403,7 @@ mod tests {
             topic: "order.events".to_owned(),
             source: None,
             target: None,
-            conversation: Some(conversation.to_owned()),
+            conversation: Some("conv-1".to_owned()),
             correlation: None,
             operation: None,
             tool: None,
@@ -402,6 +414,7 @@ mod tests {
             risk_score: None,
             receipt_digest: digest.to_owned(),
             previous_digest: previous.map(str::to_owned),
+            chain_id: chain.to_owned(),
             outcome: "effected".to_owned(),
             at_micros: 1,
         }

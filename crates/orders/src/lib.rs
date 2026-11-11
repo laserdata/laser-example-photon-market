@@ -215,7 +215,7 @@ where
 {
     let group = agent.to_string();
     let consumer = ReliableConsumer::builder()
-        .group(ConsumerGroupName::for_agent(&agent))
+        .group(ConsumerGroupName::for_agent(&agent).map_err(LaserError::from)?)
         .agent(agent)
         .topic(topic)
         .concurrency(ConcurrencyPolicy::SerialPerPartition { max_partitions: 8 })
@@ -261,7 +261,8 @@ mod tests {
         let catalog = AgentId::new(format!("{orders}-catalog"))
             .expect("the derived catalog agent id is valid");
         assert_ne!(orders, catalog, "each consumer owns its own logical agent");
-        let group = ConsumerGroupName::for_agent(&catalog);
+        let group =
+            ConsumerGroupName::for_agent(&catalog).expect("the catalog agent id fits a group name");
         assert_eq!(
             group.as_str(),
             catalog.as_str(),

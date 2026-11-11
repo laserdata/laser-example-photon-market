@@ -7,7 +7,6 @@ use photon_shared::domain::{Money, OrderId, Sku};
 use photon_shared::names::{BusinessTopic, Index};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 use tracing::warn;
 
 // The raw-Iggy order lookup: a live fold of order.events into the facts the
@@ -77,7 +76,6 @@ pub async fn start_order_fold(laser: &Laser) -> Result<Consumer, LaserError> {
         .consumer_group("desk-order-lookup")
         .consumer()
         .batch_length(200)
-        .poll_interval(Duration::from_millis(20))
         .build()
         .await
 }

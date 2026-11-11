@@ -55,7 +55,7 @@ pub struct DemoTrust {
 impl DemoTrust {
     pub fn generate(operator_principal: &str) -> Self {
         let operator = ephemeral_key();
-        let mut registry = KeyRegistry::new();
+        let registry = KeyRegistry::new();
         registry.enroll_operator(operator_principal, operator.verifying_key());
         let mut keys = HashMap::new();
         for agent in SIGNING_AGENTS {

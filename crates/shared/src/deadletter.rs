@@ -1,6 +1,6 @@
 use crate::names::STREAM;
 use crate::topology::PARTITIONS;
-use laser_sdk::iggy::prelude::{Consumer, Identifier, MessageClient, PollingStrategy};
+use laser_sdk::iggy::prelude::{Consumer, Identifier, MessageClient, PollOptions, PollingStrategy};
 use laser_sdk::prelude::{AgentTopic, Laser, LaserError};
 use laser_sdk::wire::agent::AgentDeadLetter;
 use laser_sdk::wire::framing::decode_named;
@@ -23,11 +23,13 @@ pub async fn scan(laser: &Laser) -> Result<Vec<AgentDeadLetter>, LaserError> {
                 .poll_messages(
                     &stream,
                     &topic,
-                    Some(partition),
+                    partition,
                     &reader,
                     &PollingStrategy::offset(offset),
-                    SCAN_BATCH,
-                    false,
+                    PollOptions {
+                        count: SCAN_BATCH,
+                        ..PollOptions::default()
+                    },
                 )
                 .await?;
             if polled.messages.is_empty() {

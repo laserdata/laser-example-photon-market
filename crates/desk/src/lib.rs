@@ -26,6 +26,7 @@ use laser_sdk::prelude::full::{
 };
 use laser_sdk::prelude::{Agent, AgentTopic};
 use laser_sdk::wire::agent::CapabilityDescriptor;
+use laser_sdk::wire::dispatch::OPERATION_INPUT_REQUEST;
 use photon_shared::domain::Money;
 use photon_shared::knobs;
 use photon_shared::names::{
@@ -143,6 +144,7 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
         .listen_on(AgentTopic::Sessions)
         .shutdown_grace(HANDLER_SHUTDOWN_GRACE)
         .maybe_signing_key(factory.signing_key(AppAgent::Reviewer))
+        .operations(vec![OPERATION_INPUT_REQUEST.to_owned()])
         .handler(ReviewerAgent)
         .build()
         .spawn(

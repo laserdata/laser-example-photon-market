@@ -6,7 +6,6 @@ use photon_shared::names::{AppAgent, BusinessTopic};
 use photon_shared::{BusinessProvenance, ShutdownWatch, publish_business};
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
-use std::time::Duration;
 use tracing::warn;
 use ulid::Ulid;
 
@@ -51,7 +50,6 @@ async fn build_consumer(laser: &Laser) -> Result<Consumer, LaserError> {
         .consumer_group("storefront-tickets")
         .consumer()
         .batch_length(100)
-        .poll_interval(Duration::from_millis(20))
         .build()
         .await
 }
