@@ -1,4 +1,4 @@
-use laser_sdk::iggy::prelude::{Identifier, StreamClient};
+use laser_sdk::iggy::prelude::{Identifier, StreamClient, StreamCreateOptions};
 use photon_shared::names::{BusinessTopic, STREAM};
 use photon_shared::testkit::TestIggy;
 use photon_shared::topology;
@@ -21,7 +21,7 @@ async fn given_a_fresh_iggy_when_topics_are_bootstrapped_then_should_stay_open_o
         .expect("get stream before bootstrap");
     laser
         .client()
-        .create_stream(STREAM)
+        .create_stream(STREAM, &StreamCreateOptions::default())
         .await
         .expect("create stream before bootstrap");
     for topic in BusinessTopic::iter() {

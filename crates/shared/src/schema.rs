@@ -42,13 +42,27 @@ pub async fn ensure_order_event_schema(laser: &Laser) -> Result<u32, LaserError>
     let source = SchemaSource::JsonSchema {
         schema: ORDER_EVENT_JSON_SCHEMA.to_owned(),
     };
-    if let Some(existing) = laser.schemas().list().await?.into_iter().find(|info| {
-        !info.dropped
-            && info.schema.name.as_deref() == Some(ORDER_EVENT_SCHEMA_NAME)
-            && info.schema.version == Some(ORDER_EVENT_SCHEMA_VERSION)
-            && info.schema.source == source
-    }) {
-        return Ok(existing.schema.id);
+    let mut page = 1;
+    loop {
+        let listing = laser
+            .schemas()
+            .list()
+            .name_contains(ORDER_EVENT_SCHEMA_NAME)
+            .page(page)
+            .fetch()
+            .await?;
+        if let Some(existing) = listing.items.into_iter().find(|info| {
+            !info.dropped
+                && info.schema.name.as_deref() == Some(ORDER_EVENT_SCHEMA_NAME)
+                && info.schema.version == Some(ORDER_EVENT_SCHEMA_VERSION)
+                && info.schema.source == source
+        }) {
+            return Ok(existing.schema.id);
+        }
+        if page >= listing.total_pages {
+            break;
+        }
+        page += 1;
     }
     laser
         .schemas()

@@ -83,6 +83,7 @@ pub async fn impersonate(laser: &Laser) -> Result<(), LaserError> {
         version: None,
         capabilities: Vec::new(),
         ttl_micros: None,
+        inbox: None,
     };
     laser.publish_card(AppAgent::Support.id(), &card).await?;
     // Unsigned, so a verifying registry folds nothing: hermes stays live.

@@ -1,7 +1,7 @@
 use crate::charge::{ChargeLedger, ChargeOutcome, RefundOutcome};
 use crate::events;
 use crate::quotes::{AttributedQuote, QuotePanel};
-use laser_sdk::prelude::full::{CapabilitySelector, InboxRoute, RoutePolicy};
+use laser_sdk::prelude::full::{CapabilitySelector, GatherPolicy, InboxRoute, RoutePolicy};
 use laser_sdk::prelude::{
     AgentCtx, AgentHandler, AgentId, AgentMessage, AgentTopic, Contract, LaserError, Router,
 };
@@ -152,6 +152,7 @@ impl AgentHandler for Fulfillment {
                         &selector,
                         &payload,
                         &InboxRoute::Fixed(AgentTopic::Sessions),
+                        GatherPolicy::RequireAll,
                         QUOTE_DEADLINE,
                     )
                     .await

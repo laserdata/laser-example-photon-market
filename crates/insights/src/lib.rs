@@ -45,7 +45,7 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
     let dlq = laser
         .stream(names::STREAM)
         .topic(AgentTopic::Dlq.topic_string());
-    dlq.ensure(topology::PARTITIONS).await?;
+    dlq.ensure(topology::PARTITIONS, None).await?;
     let capabilities = laser.capabilities().await;
     if capabilities.query.available {
         projections::register(&laser).await?;
@@ -78,7 +78,7 @@ pub async fn run(factory: &LaserFactory, opts: Opts) -> Result<ServiceHandle, Er
     let audit = laser
         .stream(names::STREAM)
         .topic(AgentTopic::Audit.topic_string());
-    audit.ensure(topology::PARTITIONS).await?;
+    audit.ensure(topology::PARTITIONS, None).await?;
     handle.track(tokio::spawn(dashboards::fold_evidence(
         audit,
         "insights-evidence".to_owned(),
