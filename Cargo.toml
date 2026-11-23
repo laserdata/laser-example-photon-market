@@ -13,7 +13,7 @@ version = "0.1.0"
 [workspace.dependencies]
 async-trait = { version = "0.1.92" }
 futures = { version = "0.3.34" }
-laser-sdk = { version = "0.10.0", features = ["managed", "schema-codecs", "sign"] }
+laser-sdk = { version = "0.11.0", features = ["managed", "schema-codecs", "sign"] }
 photon-adversary = { path = "crates/adversary" }
 photon-desk = { path = "crates/desk" }
 photon-insights = { path = "crates/insights" }
